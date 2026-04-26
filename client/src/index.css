@@ -1,0 +1,1672 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 认证表单样式 */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+}
+
+.auth-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 28px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.auth-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+}
+
+.auth-link a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* 新布局样式 */
+.welcome-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 260px;
+  background: #2c3e50;
+  color: white;
+  transition: width 0.3s;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar-toggle {
+  text-align: center;
+  padding: 15px;
+  cursor: pointer;
+  font-size: 20px;
+  background: #1a2a3a;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar-item:hover,
+.sidebar-item.active {
+  background: #1abc9c;
+}
+
+.sidebar-icon {
+  font-size: 20px;
+  width: 30px;
+}
+
+.sidebar-label {
+  margin-left: 10px;
+}
+
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-quote {
+  font-style: italic;
+  color: #555;
+  font-size: 14px;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logout-btn {
+  background: #e74c3c;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.content-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #f5f7fa;
+}
+
+.tab-container {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: #ecf0f1;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0;
+}
+
+.comment-list li {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.comment-form textarea {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.code-executor textarea {
+  font-family: monospace;
+  margin-bottom: 10px;
+}
+
+.output-area {
+  margin-top: 20px;
+}
+
+.ollama-test select,
+.ollama-test textarea,
+.ollama-test input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0 15px;
+}
+
+.response-box {
+  background: #f8f9fa;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.loading-full {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 20px;
+}
+
+/* Ollama 测试页面样式 */
+.ollama-test {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 20px;
+}
+
+.ollama-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ollama-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.ollama-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.ollama-field select,
+.ollama-field input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.ollama-conversation {
+  flex: 1;
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.conversation-empty {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+.message {
+  padding: 10px 15px;
+  border-radius: 12px;
+  max-width: 85%;
+  word-wrap: break-word;
+}
+
+.message.user {
+  background: #667eea;
+  color: white;
+  align-self: flex-end;
+}
+
+.message.assistant {
+  background: white;
+  border: 1px solid #ddd;
+  align-self: flex-start;
+}
+
+.message-role {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  opacity: 0.8;
+}
+
+.message-content {
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.ollama-input-area {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.ollama-prompt-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.ollama-generate-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.ollama-generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.ollama-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .ollama-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ollama-input-area {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ollama-generate-btn {
+    width: 100%;
+  }
+}
+
+/* Ollama 页面左右两栏布局 */
+.ollama-two-columns {
+  display: flex;
+  gap: 20px;
+  min-height: 500px;
+}
+
+.ollama-session-list {
+  width: 260px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.session-header h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.new-session-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.new-session-btn:hover {
+  background: #5a67d8;
+}
+
+.session-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.session-item {
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.session-item:hover {
+  background: #e9ecef;
+}
+
+.session-item.active {
+  background: #e2e8f0;
+  border-left: 3px solid #667eea;
+}
+
+.session-title {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-date {
+  font-size: 11px;
+  color: #888;
+}
+
+.no-sessions {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-size: 14px;
+}
+
+.ollama-conversation-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 调整原有对话区域高度 */
+.ollama-conversation {
+  flex: 1;
+  min-height: 350px;
+  max-height: 450px;
+  overflow-y: auto;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .ollama-two-columns {
+    flex-direction: column;
+  }
+
+  .ollama-session-list {
+    width: 100%;
+    max-height: 200px;
+  }
+}
+
+/* 文章评论页面布局 */
+.article-with-comments {
+  padding: 0 !important;
+  overflow: hidden;
+  height: 100%;
+}
+
+.article-layout {
+  display: flex;
+  height: 100%;
+  gap: 20px;
+}
+
+.article-sidebar {
+  width: 300px;
+  border-right: 1px solid #e0e0e0;
+  padding-right: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.new-post-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.new-post-btn:hover {
+  background: #5a67d8;
+}
+
+.post-form {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.post-form input,
+.post-form textarea {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.post-form button {
+  width: 100%;
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.post-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.post-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.post-item:hover {
+  background: #f0f0f0;
+}
+
+.post-item.active {
+  background: #e8f0fe;
+  border-left-color: #667eea;
+}
+
+.post-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-meta {
+  font-size: 12px;
+  color: #888;
+}
+
+.article-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.post-detail {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.post-detail h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.post-body {
+  line-height: 1.6;
+  margin-top: 15px;
+  white-space: pre-wrap;
+}
+
+.no-post-selected {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+.no-posts {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .article-layout {
+    flex-direction: column;
+  }
+
+  .article-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    max-height: 300px;
+  }
+}
+
+/* 游戏页面样式 */
+.game-container {
+  text-align: center;
+}
+
+.game-container canvas {
+  margin: 20px auto;
+  display: block;
+  cursor: none;
+}
+
+.game-controls {
+  margin-top: 15px;
+}
+
+.game-controls button {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.game-controls button:hover {
+  background: #5a67d8;
+}
+
+.game-controls p {
+  color: #555;
+  font-size: 14px;
+}
+
+/* 会话列表操作按钮 */
+.session-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.session-edit-btn,
+.session-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.session-edit-btn:hover {
+  background: #e0e0e0;
+}
+
+.session-delete-btn:hover {
+  background: #ffe0e0;
+}
+
+.session-title-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #667eea;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* 会话项信息行（时间和按钮） */
+.session-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.session-date {
+  font-size: 11px;
+  color: #888;
+}
+
+.session-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.session-edit-btn,
+.session-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.session-edit-btn:hover {
+  background: #e0e0e0;
+}
+
+.session-delete-btn:hover {
+  background: #ffe0e0;
+}
+
+.session-title-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #667eea;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* 数据库查询页面样式 */
+.database-query-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.connection-form {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.form-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.form-row input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.form-row button {
+  padding: 8px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.database-explorer {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden;
+}
+.db-sidebar {
+  width: 250px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+}
+.db-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.db-item {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+}
+.db-item:hover {
+  background: #e9ecef;
+}
+.table-item {
+  cursor: pointer;
+  padding: 4px 10px;
+  margin-left: 20px;
+  border-radius: 4px;
+}
+.table-item:hover {
+  background: #e9ecef;
+}
+.query-tabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.tab-bar {
+  display: flex;
+  background: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+  overflow-x: auto;
+}
+.tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  background: #e9ecef;
+  border-right: 1px solid #ddd;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab.active {
+  background: white;
+  border-bottom: 2px solid #667eea;
+}
+.close-tab {
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.query-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  overflow: auto;
+}
+.sql-editor {
+  position: relative;
+  margin-bottom: 15px;
+}
+.sql-editor textarea {
+  width: 100%;
+  font-family: monospace;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+}
+.execute-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.results-table {
+  flex: 1;
+  overflow: auto;
+}
+.table-wrapper {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background: #f2f2f2;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+.no-tab, .no-data {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+/* 数据库查询页面样式更新 */
+.database-query-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+.database-explorer {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden;
+}
+.db-sidebar {
+  width: 280px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.connections-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.add-conn-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.add-connection-form {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+.add-connection-form input {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+.form-actions button {
+  flex: 1;
+  padding: 6px;
+}
+.connections-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+  border-bottom: 1px solid #ddd;
+}
+.conn-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #f1f1f1;
+}
+.conn-item.active {
+  background: #667eea;
+  color: white;
+}
+.conn-info {
+  flex: 1;
+}
+.conn-name {
+  font-weight: bold;
+  display: block;
+}
+.conn-host {
+  font-size: 11px;
+  opacity: 0.7;
+}
+.conn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+}
+.database-list {
+  margin-top: 10px;
+}
+.database-list h4 {
+  margin-bottom: 8px;
+}
+.db-item {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+}
+.db-item:hover {
+  background: #e9ecef;
+}
+.table-list {
+  list-style: none;
+  padding-left: 20px;
+}
+.table-item {
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.table-item:hover {
+  background: #e9ecef;
+}
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  z-index: 1000;
+}
+
+/* 数据库连接列表样式 */
+.db-sidebar {
+  width: 280px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+}
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.add-conn-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.conn-form {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+.conn-form input {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.form-buttons {
+  display: flex;
+  gap: 8px;
+}
+.form-buttons button {
+  flex: 1;
+}
+.conn-list {
+  list-style: none;
+  padding: 0;
+}
+.conn-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.conn-name {
+  flex: 1;
+}
+.conn-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;
+}
+.db-list, .table-list {
+  list-style: none;
+  padding-left: 20px;
+}
+.db-item {
+  cursor: pointer;
+  padding: 4px 0;
+}
+.table-item {
+  cursor: pointer;
+  padding: 2px 0 2px 20px;
+}
+.table-item:hover {
+  background: #e9ecef;
+}
+
+/* 关闭全部按钮 */
+.close-all-btn {
+  margin-left: auto;
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+.close-all-btn:hover {
+  background: #c82333;
+}
+
+/* 权限管理页面样式 */
+.permission-container {
+  height: 100%;
+}
+.permission-layout {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+}
+.user-list, .conn-list {
+  width: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+}
+.user-list ul, .conn-list ul {
+  list-style: none;
+  padding: 0;
+}
+.user-list li, .conn-list li {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.user-list li.active, .conn-list li.active {
+  background: #667eea;
+  color: white;
+}
+.user-list li:hover, .conn-list li:hover {
+  background: #e9ecef;
+}
+.permission-editor {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  overflow-y: auto;
+}
+.db-permission {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.db-header input {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.tables-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+.tables-list label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+.add-db-btn, .save-perm-btn {
+  margin-top: 10px;
+  margin-right: 10px;
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.save-perm-btn {
+  background: #007bff;
+}
+.hint {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+/* 权限管理页面样式 */
+.permission-layout {
+  display: flex;
+  gap: 20px;
+  height: 70vh;
+  overflow: auto;
+}
+.user-list, .conn-tree, .binding-list {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+.user-list h4, .conn-tree h4, .binding-list h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.user-list ul, .binding-list ul {
+  list-style: none;
+  padding: 0;
+}
+.user-list li, .binding-list li {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+.user-list li.active {
+  background: #667eea;
+  color: white;
+}
+.user-list li:hover, .binding-list li:hover {
+  background: #e9ecef;
+}
+.conn-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.conn-header button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.conn-item {
+  margin-bottom: 12px;
+}
+.conn-name {
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px;
+}
+.db-list {
+  margin-left: 20px;
+}
+.db-name {
+  cursor: pointer;
+  padding: 4px;
+  color: #555;
+}
+.table-list {
+  margin-left: 20px;
+}
+.table-name {
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+.table-name:hover {
+  background: #e0e0e0;
+}
+.save-btn {
+  width: 100%;
+  margin-top: 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 权限管理页面样式 */
+.permission-container {
+  padding: 20px;
+}
+.permission-layout {
+  display: flex;
+  gap: 20px;
+  height: 70vh;
+  overflow: auto;
+  margin-top: 15px;
+}
+.user-selector {
+  width: 200px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  align-self: flex-start;
+}
+.user-selector label {
+  margin-right: 8px;
+  font-weight: bold;
+}
+.user-selector select {
+  padding: 6px;
+  border-radius: 4px;
+  width: 120px;
+}
+.conn-tree {
+  flex: 3;  /* 增大占比 */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+.binding-list {
+  flex: 2;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+.conn-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.conn-header button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.conn-item {
+  margin-bottom: 12px;
+}
+.conn-name {
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px;
+}
+.db-list {
+  margin-left: 20px;
+}
+.db-name {
+  cursor: pointer;
+  padding: 4px;
+  color: #555;
+}
+.table-list {
+  margin-left: 20px;
+}
+.table-name {
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+.table-name:hover {
+  background: #e0e0e0;
+}
+.binding-list ul {
+  list-style: none;
+  padding: 0;
+}
+.binding-list li {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #eee;
+}
+.binding-list li:hover {
+  background: #e9ecef;
+}
+.save-btn {
+  width: 100%;
+  margin-top: 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* DeepSeek AI 页面样式 */
+.deepseek-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.deepseek-header {
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.deepseek-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.deepseek-info {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.iframe-wrapper {
+  flex: 1;
+  position: relative;
+  background: #f5f5f5;
+}
+
+.deepseek-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.iframe-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  z-index: 10;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.deepseek-error {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  background: #fafafa;
+}
+
+.error-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.deepseek-error h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.deepseek-error p {
+  color: #666;
+  margin-bottom: 25px;
+  max-width: 500px;
+}
+
+.deepseek-error code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.error-actions a {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.error-actions a:hover {
+  background: #5a67d8;
+}
+
+/* 游戏中心子选项卡样式 */
+.game-center {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.game-tabs {
+  display: flex;
+  background: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.game-tabs button {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+  border-bottom: 3px solid transparent;
+}
+
+.game-tabs button.active {
+  background: white;
+  border-bottom-color: #667eea;
+  color: #667eea;
+  font-weight: bold;
+}
+
+.game-tabs button:hover:not(.active) {
+  background: #e9ecef;
+}
+
+.game-content {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  background: #2d5a27; /* 森林游戏背景色会自己设置，这里给个默认 */
+}
