@@ -1,0 +1,12 @@
+client/node_modules/
+client/package-lock.json
+server/test/
+server/data/
+server/package-lock.json
+server/node_modules/
+server/generate-backend.js
+
+generate-project.js
+
+
+other.md
