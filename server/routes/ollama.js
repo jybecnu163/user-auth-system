@@ -21,6 +21,7 @@ router.get('/ollama/models', async (req, res) => {
 router.post('/ollama/generate', async (req, res) => {
   try {
     const { model, prompt, system } = req.body;
+     console.info('/ollama/generate:', model, prompt, system);
     const response = await fetch(`${config.OLLAMA_API_URL}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

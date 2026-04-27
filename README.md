@@ -112,6 +112,8 @@ npm start     # 默认 http://localhost:3000
 - 后端：`server/.env` 可修改端口和 JWT 密钥
 - 前端：`client/.env` 可修改 API 地址
 
+## 更新列表
+  - 2026/04/27  文章评论添加@AI功能
 
 ##  效果图：
 ![示例图片](./image/1.bmp "登录页")

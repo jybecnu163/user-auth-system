@@ -1,6 +1,7 @@
 // client/src/components/tabs/ArticleWithComments.js
 import React, { useState, useEffect } from 'react';
 import { getPosts, getPost, createPost, getComments, postComment } from '../../api';
+import { ollamaGenerate } from '../../api'; // 导入 AI 生成接口
 
 const ArticleWithComments = () => {
   const [posts, setPosts] = useState([]);           // 文章列表
@@ -8,7 +9,8 @@ const ArticleWithComments = () => {
   const [comments, setComments] = useState([]);     // 当前文章的评论
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
-  
+  const [aiGenerating, setAiGenerating] = useState(false);
+
   // 发布文章相关状态
   const [showPostForm, setShowPostForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -54,16 +56,55 @@ const ArticleWithComments = () => {
     loadPosts();
   }, []);
 
+  // 调用 AI 生成回复
+  const generateAIReply = async (userComment, postTitle, postContent, previousComments) => {
+    // 构建上下文
+    const context = `文章标题：${postTitle}\n文章内容：${postContent}\n历史评论：\n${previousComments.map(c => `${c.username}: ${c.content}`).join('\n')}\n用户最新评论：${userComment}\n请作为AI助手，针对用户的评论给出友好、有帮助的回复。回复内容应简洁。`;
+    try {
+      const res = await ollamaGenerate('qwen2.5-coder:7b', context, '你是一个乐于助人的AI助手。');
+
+      return res.data.response || '抱歉，我暂时无法回答。';
+    } catch (error) {
+      console.error('AI生成失败', error);
+      return 'AI服务暂时不可用，请稍后再试。';
+    }
+  };
+
+
   // 发布评论
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim() || !currentPost) return;
+    const commentText = newComment.trim();
+    const isAICall = commentText.startsWith('@AI');
+    // 先提交用户评论
     setCommentLoading(true);
     try {
-      const res = await postComment(currentPost.id, newComment);
-      setComments([...comments, res.data]);
+      const res = await postComment(currentPost.id, commentText);
+      const userCommentObj = res.data;
+      setComments(prev => [...prev, userCommentObj]);
       setNewComment('');
+
+      // 如果是 @AI 调用，则生成并提交 AI 回复
+      if (isAICall) {
+        setAiGenerating(true);
+        const question = commentText.replace(/^@AI\s*/i, '').trim();
+        const previousComments = comments; // 不包含刚提交的？可以用更新后的 comments，但需要等待状态更新，使用当前 comments 加上新的
+        const allCommentsForAI = [...comments, userCommentObj];
+        const reply = await generateAIReply(
+          question || '请介绍一下你自己',
+          currentPost.title,
+          currentPost.content,
+          allCommentsForAI
+        );
+        // 提交 AI 回复作为评论（特殊用户名标记）
+        const aiCommentContent = `🤖 AI回复：${reply}`;
+        await postComment(currentPost.id, aiCommentContent);
+        await loadComments(currentPost.id); // 刷新评论列表
+        setAiGenerating(false);
+      }
     } catch (error) {
+      setAiGenerating(false);
       alert('发布失败，请登录后重试');
     } finally {
       setCommentLoading(false);
