@@ -62,4 +62,10 @@ export const getDbConnections = () => api.get('/api/db-connections');
 export const saveDbConnection = (data) => api.post('/api/db-connections', data);
 export const deleteDbConnection = (id) => api.delete(`/api/db-connections/${id}`);
 
+// export const generateScene = (characters) => api.post(`/api/aichat/generate-scene`, characters);
+// export const generateCharacters = (n) => api.post(`/api/aichat/generate-characters`, n);
+// // export const nextMessage = (characters, scene, history, idx) => api.post(`/api/aichat/next-message`, characters, scene, history, idx);
+
+// export const nextMessage =(characters, scene, history, idx) => api.post('/aichat/next-message', characters, scene, history, idx);
+
 export default api;

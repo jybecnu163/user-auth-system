@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI角色对话工坊 · 本地Ollama纯前端版（含跨域解决指南）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: system-ui, 'Segoe UI', sans-serif;
+            padding: 20px 16px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        header {
+            background: #1e2a3a;
+            color: white;
+            padding: 20px 28px;
+        }
+
+        header small {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .section {
+            padding: 20px 28px;
+            border-bottom: 1px solid #e9edf2;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 12px 0;
+        }
+
+        button,
+        input,
+        select {
+            padding: 8px 16px;
+            border-radius: 60px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        button {
+            background: #2c5f8a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            background: #1e4663;
+            transform: scale(0.97);
+        }
+
+        button:disabled {
+            background: #9aaebf;
+            cursor: not-allowed;
+        }
+
+        .char-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .char-card {
+            background: #f8fafc;
+            border-radius: 28px;
+            padding: 16px;
+            flex: 1 0 200px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .scene-box {
+            background: #eef2ff;
+            padding: 16px 20px;
+            border-radius: 28px;
+            margin: 12px 0;
+            border-left: 6px solid #2c5f8a;
+        }
+
+        .dialogue-area {
+            background: #f1f5f9;
+            border-radius: 28px;
+            padding: 18px;
+            max-height: 420px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            background: #dce5f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .message-bubble {
+            background: white;
+            border-radius: 20px;
+            border-top-left-radius: 6px;
+            padding: 10px 18px;
+            max-width: 85%;
+        }
+
+        .msg-name {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #2c5f8a;
+            margin-bottom: 4px;
+        }
+
+        .interject-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 80px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .typing {
+            color: #6c86a3;
+            font-style: italic;
+            padding: 8px 0 4px 52px;
+            font-size: 0.85rem;
+        }
+
+        .warning-card {
+            background: #fff5e6;
+            border-left: 5px solid #f0a500;
+            padding: 12px 20px;
+            border-radius: 24px;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+        }
+
+        .code-cmd {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            font-family: monospace;
+            padding: 6px 12px;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+
+        .config-bar {
+            background: #f1f5f9;
+            border-radius: 28px;
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        hr {
+            margin: 8px 0;
+        }
+
+        .copy-btn {
+            background: #3b6e4c;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            border-radius: 40px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 AI 角色对话工坊 <small>· 纯前端 + 本地 Ollama</small></h1>
+            <div style="font-size:0.8rem; margin-top: 6px;">⚡ 完全在浏览器运行，需配置本地 Ollama 并处理 CORS</div>
+        </header>
+
+        <!-- 跨域解决方案区块 -->
+        <div class="section" style="background:#fef9e3;">
+            <div style="display: flex; align-items: center; gap: 8px;"><span>🛡️</span><strong>跨域问题解决方案</strong></div>
+            <div class="warning-card">
+                <p>⚠️ 由于浏览器安全限制，直接请求 <code>localhost:11434</code> 会被拦截。<strong>推荐以下两种方式之一：</strong></p>
+                <ol style="margin: 8px 0 8px 20px;">
+                    <li><strong>🔓 禁用浏览器安全策略（最简单）</strong> – 复制下面命令并运行，会打开一个无跨域限制的浏览器窗口。<br />
+                        <div style="margin: 8px 0;">
+                            <code id="chromeCmd"
+                                class="code-cmd">chrome.exe --disable-web-security --user-data-dir="C:\temp_chrome_dev"</code>
+                            <button id="copyCmdBtn" class="copy-btn">📋 复制</button>
+                        </div>
+                        <span style="font-size:0.75rem;">(Edge 用户将 chrome.exe 替换为 msedge.exe，macOS 使用
+                            <code>open -n -a /Applications/Google\ Chrome.app --args --disable-web-security --user-data-dir="/tmp/chrome_dev"</code>)</span>
+                    </li>
+                    <li><strong>🌐 使用本地 CORS 代理</strong> – 运行 <code>npm install -g local-cors-proxy</code> 然后
+                        <code>lcp --proxyUrl http://localhost:11434 --port 8010</code>，再将下方 Ollama 地址改为
+                        <code>http://localhost:8010/api/generate</code>。</li>
+                </ol>
+                <p>✅ 配置正确后点击下方“🔌 测试连接”，显示成功即可开始。</p>
+            </div>
+            <div class="config-bar">
+                <div class="config-item">
+                    <span>🔧 Ollama 地址</span>
+                    <input type="text" id="ollamaUrl" value="http://localhost:11434/api/generate" size="30">
+                </div>
+                <div class="config-item">
+                    <span>🤖 模型名称</span>
+                    <input type="text" id="modelName" value="qwen2.5-coder:7b" placeholder="e.g., llama3.1:8b">
+                </div>
+                <div class="config-item">
+                    <span>🌡️ Temperature</span>
+                    <input type="number" id="temperature" value="0.8" step="0.1" min="0.1" max="1.5" style="width:80px">
+                </div>
+                <button id="testConnectionBtn" style="background:#3b6e4c;">🔌 测试连接</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>📌 1. 生成角色</h3>
+            <div class="flex-row">
+                <label>角色数量 N：</label>
+                <input type="number" id="nInput" min="2" max="6" value="3">
+                <button id="genCharsBtn">✨ 生成角色 (AI)</button>
+            </div>
+            <div id="charactersPanel"></div>
+        </div>
+
+        <div class="section" id="sceneSection" style="display:none;">
+            <h3>🎬 2. 生成场景</h3>
+            <button id="genSceneBtn">🎲 基于角色生成场景</button>
+            <div id="scenePanel"></div>
+        </div>
+
+        <div class="section" id="dialogueSection" style="display:none;">
+            <h3>💬 3. AI 对话剧场</h3>
+            <div class="flex-row">
+                <button id="startDialogueBtn">▶ 开始自动对话</button>
+                <button id="stopDialogueBtn" disabled>⏸ 停止</button>
+            </div>
+            <div id="dialogueContainer" class="dialogue-area"></div>
+            <div class="interject-bar" id="interjectBar" style="display:none;">
+                <select id="interjectRoleSelect"></select>
+                <input type="text" id="interjectInput" placeholder="输入你想说的话..." autocomplete="off">
+                <button id="interjectBtn">💬 插话</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 元素
+        const genCharsBtn = document.getElementById('genCharsBtn');
+        const nInput = document.getElementById('nInput');
+        const charactersPanel = document.getElementById('charactersPanel');
+        const sceneSection = document.getElementById('sceneSection');
+        const genSceneBtn = document.getElementById('genSceneBtn');
+        const scenePanel = document.getElementById('scenePanel');
+        const dialogueSection = document.getElementById('dialogueSection');
+        const startDialogueBtn = document.getElementById('startDialogueBtn');
+        const stopDialogueBtn = document.getElementById('stopDialogueBtn');
+        const dialogueContainer = document.getElementById('dialogueContainer');
+        const interjectBar = document.getElementById('interjectBar');
+        const interjectRoleSelect = document.getElementById('interjectRoleSelect');
+        const interjectInput = document.getElementById('interjectInput');
+        const interjectBtn = document.getElementById('interjectBtn');
+        const ollamaUrlInput = document.getElementById('ollamaUrl');
+        const modelNameInput = document.getElementById('modelName');
+        const temperatureInput = document.getElementById('temperature');
+        const testConnectionBtn = document.getElementById('testConnectionBtn');
+        const copyCmdBtn = document.getElementById('copyCmdBtn');
+        const chromeCmdSpan = document.getElementById('chromeCmd');
+
+        // 状态
+        let characters = [];
+        let scene = '';
+        let history = [];
+        let dialogueActive = false;
+        let currentSpeakerIndex = 0;
+        let timeoutId = null;
+        let isWaiting = false;
+
+        // 复制命令
+        copyCmdBtn?.addEventListener('click', () => {
+            const text = chromeCmdSpan.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('命令已复制，请关闭当前所有 Chrome 窗口，然后运行此命令（Win+R 输入 cmd 粘贴执行）');
+            }).catch(() => alert('手动复制即可'));
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+        }
+
+        function appendMessage(role, content, isSystem = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message';
+            if (isSystem) {
+                msgDiv.style.justifyContent = 'center';
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.style.background = '#e9ecef';
+                bubble.style.textAlign = 'center';
+                bubble.style.fontStyle = 'italic';
+                bubble.innerText = content;
+                msgDiv.appendChild(bubble);
+            } else {
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerText = role.charAt(0).toUpperCase();
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.innerHTML = `<div class="msg-name">${escapeHtml(role)}</div><div class="msg-text">${escapeHtml(content)}</div>`;
+                msgDiv.appendChild(avatar);
+                msgDiv.appendChild(bubble);
+            }
+            dialogueContainer.appendChild(msgDiv);
+            dialogueContainer.scrollTop = dialogueContainer.scrollHeight;
+        }
+
+        function clearDialogueArea() {
+            dialogueContainer.innerHTML = '';
+            appendMessage('系统', '💬 新对话即将开始', true);
+        }
+
+        // 调用 Ollama（带跨域错误捕获）
+        async function callOllama(prompt, systemPrompt = '') {
+            const url = ollamaUrlInput.value.trim();
+            const model = modelNameInput.value.trim();
+            const temperature = parseFloat(temperatureInput.value);
+            if (!model) throw new Error('请填写模型名称');
+            const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
+            const requestBody = {
+                model: model,
+                prompt: fullPrompt,
+                stream: false,
+                options: { temperature: isNaN(temperature) ? 0.8 : temperature, num_predict: 512, top_p: 0.9 }
+            };
+            let response;
+            try {
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+            } catch (err) {
+                // 检测是否为跨域错误 (type错误且无法获取响应)
+                if (err.message.includes('fetch') || err.message.includes('Failed to fetch') || err.name === 'TypeError') {
+                    throw new Error('❌ 跨域请求被拦截！请按照页面顶部方案禁用浏览器安全策略或使用 CORS 代理。\n详细：' + err.message);
+                }
+                throw err;
+            }
+            if (!response.ok) {
+                let errText = await response.text();
+                throw new Error(`Ollama 请求失败 (${response.status}): ${errText.slice(0, 120)}`);
+            }
+            const data = await response.json();
+            if (!data.response) throw new Error('Ollama 返回内容为空');
+            return data.response.trim();
+        }
+
+        // 测试连接
+        testConnectionBtn.addEventListener('click', async () => {
+            testConnectionBtn.disabled = true;
+            const original = testConnectionBtn.innerText;
+            testConnectionBtn.innerText = '⏳ 测试中...';
+            try {
+                await callOllama('回复"OK"', '你只需要回复大写OK，不要有其他内容。');
+                alert('✅ 连接成功！Ollama 模型正常响应，跨域已解决。');
+            } catch (err) {
+                alert(`❌ 连接失败: ${err.message}\n\n请根据页面顶部提示处理跨域问题。`);
+            } finally {
+                testConnectionBtn.disabled = false;
+                testConnectionBtn.innerText = original;
+            }
+        });
+
+        // 生成角色
+        async function generateCharacters() {
+            const n = parseInt(nInput.value, 10);
+            if (isNaN(n) || n < 2 || n > 6) { alert('请输入2~6'); return; }
+            setButtonLoading(genCharsBtn, true);
+            try {
+                const prompt = `请生成 ${n} 个普通现实角色，每个角色包含：姓名、年龄、职业、性格(10字内)、生活习惯(10字内)。用 JSON 数组格式返回，示例：[{"name":"李芳华","age":52,"job":"退休收银员","personality":"热心八卦嗓门亮","habit":"早晚遛狗跳广场舞"}]`;
+                let result = await callOllama(prompt, '你是一个角色生成助手，只输出合法 JSON 数组，不要有其他解释。');
+                const jsonMatch = result.match(/\[[\s\S]*\]/);
+                if (!jsonMatch) throw new Error('未找到JSON数组');
+                characters = JSON.parse(jsonMatch[0]);
+                if (!Array.isArray(characters) || characters.length !== n) throw new Error('角色数量不符');
+                renderCharacters();
+                sceneSection.style.display = 'block';
+                scene = '';
+                scenePanel.innerHTML = '';
+                dialogueSection.style.display = 'none';
+                resetDialogueState();
+            } catch (err) {
+                alert('生成角色失败: ' + err.message);
+            } finally {
+                setButtonLoading(genCharsBtn, false);
+            }
+        }
+
+        function renderCharacters() {
+            if (!characters.length) { charactersPanel.innerHTML = '<div style="color:#999;">暂无角色</div>'; return; }
+            let html = '<div class="char-grid">';
+            characters.forEach(c => {
+                html += `<div class="char-card"><strong>${escapeHtml(c.name)}</strong>，${c.age}岁<br>${escapeHtml(c.job)}<br>🧠 ${escapeHtml(c.personality)}<br>🌿 ${escapeHtml(c.habit)}</div>`;
+            });
+            html += '</div>';
+            charactersPanel.innerHTML = html;
+            if (characters.length) {
+                interjectRoleSelect.innerHTML = '<option value="【用户】">👤 我（用户）</option>' + characters.map(c => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join('');
+            }
+        }
+
+        async function generateScene() {
+            if (!characters.length) { alert('请先生成角色'); return; }
+            setButtonLoading(genSceneBtn, true);
+            try {
+                const charDesc = characters.map(c => `${c.name}（${c.job}，${c.personality}）`).join('；');
+                const prompt = `人物：${charDesc}。请生成一个日常生活中可能发生的具体场景（含地点、事件起因），不超过150字。`;
+                const sceneText = await callOllama(prompt, '你是一个场景创意助手，直接输出场景描述。');
+                scene = sceneText;
+                scenePanel.innerHTML = `<div class="scene-box">🏞️ ${escapeHtml(scene)}</div>`;
+                dialogueSection.style.display = 'block';
+                resetDialogueState();
+            } catch (err) {
+                alert('生成场景失败: ' + err.message);
+            } finally {
+                setButtonLoading(genSceneBtn, false);
+            }
+        }
+
+        function resetDialogueState() {
+            if (timeoutId) clearTimeout(timeoutId);
+            dialogueActive = false;
+            isWaiting = false;
+            history = [];
+            currentSpeakerIndex = 0;
+            startDialogueBtn.disabled = false;
+            stopDialogueBtn.disabled = true;
+            interjectBar.style.display = characters.length ? 'flex' : 'none';
+            clearDialogueArea();
+        }
+
+        async function fetchCharacterReply(character, currentHistory, sceneDesc) {
+            let systemPrompt = `场景：${sceneDesc}\n角色设定：姓名：${character.name}，年龄：${character.age}，职业：${character.job}，性格：${character.personality}，习惯：${character.habit}。\n严格以该角色口吻说话，口语自然，长度1-2句，不要加名字前缀。`;
+            let context = currentHistory.length ? '对话历史：\n' + currentHistory.map(m => `${m.role}：${m.content}`).join('\n') + '\n' : '';
+            const userPrompt = `${context}现在轮到${character.name}发言，直接输出他说的话：`;
+            return await callOllama(userPrompt, systemPrompt);
+        }
+
+        async function nextMessage() {
+            if (!dialogueActive || isWaiting) return;
+            if (!characters.length || !scene) { stopDialogue(); return; }
+            const idx = currentSpeakerIndex;
+            const currentChar = characters[idx];
+            if (!currentChar) { stopDialogue(); return; }
+            isWaiting = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing';
+            typingDiv.innerText = `${currentChar.name} 正在思考...`;
+            dialogueContainer.appendChild(typingDiv);
+            dialogueContainer.scrollTop = dialogueContainer.scrollHeight;
+            try {
+                const reply = await fetchCharacterReply(currentChar, history, scene);
+                typingDiv.remove();
+                history.push({ role: currentChar.name, content: reply });
+                appendMessage(currentChar.name, reply);
+                currentSpeakerIndex = (idx + 1) % characters.length;
+                isWaiting = false;
+                if (dialogueActive) timeoutId = setTimeout(nextMessage, 1500);
+            } catch (err) {
+                typingDiv.remove();
+                appendMessage('系统', `❌ ${currentChar.name} 发言失败: ${err.message}`, true);
+                isWaiting = false;
+                stopDialogue();
+            }
+        }
+
+        function startDialogue() {
+            if (!characters.length || !scene) { alert('请先生成角色和场景'); return; }
+            if (dialogueActive) stopDialogue();
+            resetDialogueState();
+            dialogueActive = true;
+            startDialogueBtn.disabled = true;
+            stopDialogueBtn.disabled = false;
+            interjectBar.style.display = 'flex';
+            history = [];
+            currentSpeakerIndex = 0;
+            clearDialogueArea();
+            appendMessage('系统', '🎭 对话开始！', true);
+            timeoutId = setTimeout(() => nextMessage(), 400);
+        }
+
+        function stopDialogue() {
+            dialogueActive = false;
+            if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+            isWaiting = false;
+            startDialogueBtn.disabled = false;
+            stopDialogueBtn.disabled = true;
+            appendMessage('系统', '⏸️ 对话已停止', true);
+        }
+
+        async function handleInterject() {
+            if (!dialogueActive) { alert('请先开始对话'); return; }
+            const role = interjectRoleSelect.value;
+            const message = interjectInput.value.trim();
+            if (!message) return;
+            if (isWaiting) { alert('AI 正在回复，请稍后'); return; }
+            if (timeoutId) clearTimeout(timeoutId);
+            const userMsg = { role, content: message };
+            history.push(userMsg);
+            appendMessage(role, message);
+            interjectInput.value = '';
+            const respondingChar = characters[currentSpeakerIndex];
+            if (!respondingChar) { startDialogue(); return; }
+            isWaiting = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing';
+            typingDiv.innerText = `${respondingChar.name} 回应中...`;
+            dialogueContainer.appendChild(typingDiv);
+            try {
+                const reply = await fetchCharacterReply(respondingChar, history, scene);
+                typingDiv.remove();
+                history.push({ role: respondingChar.name, content: reply });
+                appendMessage(respondingChar.name, reply);
+                currentSpeakerIndex = (currentSpeakerIndex + 1) % characters.length;
+                isWaiting = false;
+                if (dialogueActive) timeoutId = setTimeout(nextMessage, 1400);
+            } catch (err) {
+                typingDiv.remove();
+                appendMessage('系统', `插话失败: ${err.message}`, true);
+                isWaiting = false;
+                stopDialogue();
+            }
+        }
+
+        function setButtonLoading(btn, loading) {
+            if (loading) {
+                btn.disabled = true;
+                btn._oldText = btn.innerHTML;
+                btn.innerHTML = btn.innerHTML + ' ⏳';
+            } else {
+                btn.disabled = false;
+                if (btn._oldText) btn.innerHTML = btn._oldText;
+            }
+        }
+
+        genCharsBtn.addEventListener('click', generateCharacters);
+        genSceneBtn.addEventListener('click', generateScene);
+        startDialogueBtn.addEventListener('click', startDialogue);
+        stopDialogueBtn.addEventListener('click', stopDialogue);
+        interjectBtn.addEventListener('click', handleInterject);
+        interjectInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleInterject(); });
+    </script>
+</body>
+
+</html>

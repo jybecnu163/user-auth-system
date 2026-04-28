@@ -16,6 +16,6 @@ app.use('/api', require('./routes/stats'));
 app.use('/api', require('./routes/mysql'));
 app.use('/api', require('./routes/dbConnections'));
 app.use('/api', require('./routes/permissions'));
-app.use('/api', require('./routes/userTablePermissions'));
+app.use('/api', require('./routes/userTablePermissions')); 
 
 module.exports = app;

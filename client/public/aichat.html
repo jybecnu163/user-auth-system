@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI 角色对话工坊 · 原生版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eef2f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 24px 16px;
+        }
+        .app {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        h1 {
+            background: #1e2a3a;
+            color: white;
+            padding: 20px 24px;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .step, .characters, .scene, .dialogue-box {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9edf2;
+        }
+        .step:last-child, .characters:last-child, .scene:last-child, .dialogue-box:last-child {
+            border-bottom: none;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 12px 0;
+        }
+        label {
+            font-weight: 600;
+            color: #2c3e4e;
+        }
+        input, select, button {
+            padding: 8px 16px;
+            border-radius: 60px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+        }
+        button {
+            background: #2c5f8a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #1d4464;
+        }
+        button:disabled {
+            background: #9aaebf;
+            cursor: not-allowed;
+        }
+        .char-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .char-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 14px;
+            flex: 1 0 180px;
+            border: 1px solid #e2edf2;
+        }
+        .char-card strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+        .scene p {
+            background: #eef2ff;
+            padding: 16px;
+            border-radius: 24px;
+            margin: 12px 0 0;
+            font-style: italic;
+        }
+        .dialogue-box {
+            background: #f1f5f9;
+        }
+        .message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+        .role {
+            font-weight: bold;
+            color: #2c5f8a;
+        }
+        .content {
+            margin-left: 6px;
+        }
+        .typing {
+            color: #6c86a3;
+            font-style: italic;
+            margin-top: 8px;
+            padding-left: 8px;
+        }
+        button + button {
+            margin-left: 12px;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #1e2a3a;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <h1>🎭 AI 角色对话工坊</h1>
+
+    <!-- 步骤0：生成角色 -->
+    <div class="step">
+        <div class="flex-row">
+            <label>角色数量 N：</label><input type="number" id="nInput" min="2" max="6" value="3"><button id="genCharsBtn">✨ 生成角色</button>
+        </div>
+    </div>
+
+    <!-- 角色列表区 -->
+    <div id="charactersSection" class="characters" style="display: none;">
+        <h3>📋 已生成角色（确认后可继续）</h3><div id="charGrid" class="char-grid"></div><button id="genSceneBtn" style="margin-top: 12px;">🎬 确认角色，生成场景</button>
+    </div>
+
+    <!-- 场景展示区 -->
+    <div id="sceneSection" class="scene" style="display: none;">
+        <h3>🏞️ 场景设定</h3>
+        <p id="sceneText"></p>
+        <div class="flex-row" style="margin-top: 12px;">
+            <button id="startDialogueBtn">💬 开始AI对话</button> <button id="stopDialogueBtn" disabled>⏸️ 停止对话</button>
+        </div>
+    </div>
+
+    <!-- 对话记录区 -->
+    <div id="dialogueSection" class="dialogue-box" style="display: none;">
+        <h3>🗣️ 实时对话</h3>
+        <div id="historyContainer"></div>
+        <div id="typingIndicator" style="display: none;" class="typing">💭 思考中...</div>
+    </div>
+</div>
+
+<script>
+    // API 基础地址（与后端保持一致）
+    const API_BASE = 'http://localhost:5000/api';
+
+    // ---------- 全局状态 ----------
+    let characters = [];            // 角色数组
+    let scene = '';                // 当前场景
+    let history = [];              // 对话历史 [{ role, content }]
+    let dialogueActive = false;    // 是否正在自动对话
+    let currentSpeakerIdx = 0;     // 当前应发言的角色索引
+    let timeoutId = null;          // setTimeout id
+    let isWaiting = false;         // 防止并发请求
+
+    // DOM 元素
+    const nInput = document.getElementById('nInput');
+    const genCharsBtn = document.getElementById('genCharsBtn');
+    const charactersSection = document.getElementById('charactersSection');
+    const charGrid = document.getElementById('charGrid');
+    const genSceneBtn = document.getElementById('genSceneBtn');
+    const sceneSection = document.getElementById('sceneSection');
+    const sceneText = document.getElementById('sceneText');
+    const startDialogueBtn = document.getElementById('startDialogueBtn');
+    const stopDialogueBtn = document.getElementById('stopDialogueBtn');
+    const dialogueSection = document.getElementById('dialogueSection');
+    const historyContainer = document.getElementById('historyContainer');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    // 辅助函数：escapeHtml
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 渲染角色卡片
+    function renderCharacters() {
+        if (!characters.length) {
+            charGrid.innerHTML = '<div style="color:#999;">暂无角色</div>';
+            return;
+        }
+        let html = '';
+        characters.forEach(c => {
+            html += `<div class="char-card">
+                        <strong>${escapeHtml(c.name)}</strong>，${c.age}岁<br>
+                        ${escapeHtml(c.job)}<br>
+                        🧠 ${escapeHtml(c.personality)}<br>
+                        🌿 ${escapeHtml(c.habit)}
+                    </div>`;
+        });
+        charGrid.innerHTML = html;
+    }
+
+    // 渲染对话历史
+    function renderHistory() {
+        if (!history.length) {
+            historyContainer.innerHTML = '<div style="color:#aaa; text-align:center;">暂无对话记录</div>';
+            return;
+        }
+        let html = '';
+        
+        //   <span class="role">${escapeHtml(msg.role)}：</span>
+        history.forEach(msg => {
+            html += `<div class="message">
+                       <span class="content">${escapeHtml(msg.content)}</span>
+                    </div>`;
+        });
+        historyContainer.innerHTML = html;
+        // 自动滚动到底部
+        const container = historyContainer.parentElement;
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // 重置对话状态（停止自动对话、清空历史）
+    function resetDialogueState() {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+        dialogueActive = false;
+        isWaiting = false;
+        history = [];
+        currentSpeakerIdx = 0;
+        renderHistory();
+        startDialogueBtn.disabled = false;
+        stopDialogueBtn.disabled = true;
+        typingIndicator.style.display = 'none';
+    }
+
+    // 停止对话（外部调用）
+    function stopDialogue() {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+        dialogueActive = false;
+        isWaiting = false;
+        startDialogueBtn.disabled = false;
+        stopDialogueBtn.disabled = true;
+        typingIndicator.style.display = 'none';
+        // 添加系统提示（可选）
+        const sysMsg = { role: '系统', content: '⏸️ 对话已停止' };
+        history.push(sysMsg);
+        renderHistory();
+    }
+
+    // 核心：获取下一条消息（自动发言）
+    async function nextMessage() {
+        if (!dialogueActive) return;
+        if (isWaiting) return;
+
+        const idx = currentSpeakerIdx;
+        const currentChar = characters[idx];
+        if (!currentChar) {
+            // 没有角色了，结束对话
+            stopDialogue();
+            return;
+        }
+
+        isWaiting = true;
+        typingIndicator.style.display = 'block';
+        // 滚动到可见
+        typingIndicator.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        try {
+            const response = await fetch(`${API_BASE}/aichat/next-message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    characters,
+                    scene,
+                    history,
+                    currentCharacterIndex: idx
+                })
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const data = await response.json();
+            const newMessage = { role: currentChar.name, content: data.message };
+            history.push(newMessage);
+            renderHistory();
+
+            // 移动到下一位
+            const nextIdx = (idx + 1) % characters.length;
+            currentSpeakerIdx = nextIdx;
+
+            isWaiting = false;
+            typingIndicator.style.display = 'none';
+
+            if (dialogueActive) {
+                timeoutId = setTimeout(() => {
+                    timeoutId = null;
+                    nextMessage();
+                }, 1500);
+            }
+        } catch (err) {
+            console.error('发言失败:', err);
+            typingIndicator.style.display = 'none';
+            isWaiting = false;
+            // 添加错误提示
+            history.push({ role: '系统', content: `❌ 发言失败: ${err.message}` });
+            renderHistory();
+            stopDialogue();
+        }
+    }
+
+    // 开始对话
+    function startDialogue() {
+        if (!characters.length || !scene) {
+            alert('请先生成角色和场景');
+            return;
+        }
+        // 重置所有对话状态
+        resetDialogueState();
+        dialogueActive = true;
+        startDialogueBtn.disabled = true;
+        stopDialogueBtn.disabled = false;
+        history = [];
+        currentSpeakerIdx = 0;
+        renderHistory();
+        // 不添加系统消息，直接开始
+        nextMessage();
+    }
+
+    // 生成角色
+    async function generateCharacters() {
+        const n = parseInt(nInput.value, 10);
+        if (isNaN(n) || n < 2 || n > 6) {
+            alert('请输入 2~6 之间的整数');
+            return;
+        }
+        const originalText = genCharsBtn.innerHTML;
+        genCharsBtn.disabled = true;
+        genCharsBtn.innerHTML = '⏳ 生成中...';
+        try {
+            const response = await fetch(`${API_BASE}/aichat/generate-characters`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ n })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            characters = data.characters;
+            // 显示角色区域
+            charactersSection.style.display = 'block';
+            renderCharacters();
+            // 重置场景和对话区域
+            scene = '';
+            sceneSection.style.display = 'none';
+            dialogueSection.style.display = 'none';
+            resetDialogueState(); // 清空可能残留的对话
+        } catch (err) {
+            alert('生成角色失败，请检查后端是否运行。\n' + err.message);
+        } finally {
+            genCharsBtn.disabled = false;
+            genCharsBtn.innerHTML = originalText;
+        }
+    }
+
+    // 生成场景
+    async function generateScene() {
+        if (!characters.length) {
+            alert('请先生成角色');
+            return;
+        }
+        const originalText = genSceneBtn.innerHTML;
+        genSceneBtn.disabled = true;
+        genSceneBtn.innerHTML = '⏳ 生成中...';
+        try {
+            const response = await fetch(`${API_BASE}/aichat/generate-scene`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ characters })
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            scene = data.scene;
+            sceneText.innerText = scene;
+            sceneSection.style.display = 'block';
+            dialogueSection.style.display = 'block';
+            resetDialogueState(); // 新场景，清空旧对话
+        } catch (err) {
+            alert('生成场景失败: ' + err.message);
+        } finally {
+            genSceneBtn.disabled = false;
+            genSceneBtn.innerHTML = originalText;
+        }
+    }
+
+    // ---------- 绑定事件 ----------
+    genCharsBtn.addEventListener('click', generateCharacters);
+    genSceneBtn.addEventListener('click', generateScene);
+    startDialogueBtn.addEventListener('click', startDialogue);
+    stopDialogueBtn.addEventListener('click', stopDialogue);
+
+    // 初始隐藏所有动态区域
+    charactersSection.style.display = 'none';
+    sceneSection.style.display = 'none';
+    dialogueSection.style.display = 'none';
+</script>
+</body>
+</html>

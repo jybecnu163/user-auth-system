@@ -16,6 +16,8 @@ import DatabaseQuery from './tabs/DatabaseQuery';
 import PermissionManager from './tabs/PermissionManager';
 
 import DeepSeekChat from './tabs/DeepSeekChat';
+// 在文件顶部导入
+import PureHtmlPage from './tabs/PureHtmlPage'; 
 
 /**
  * emoji，存一份方便以后使用📂
@@ -52,6 +54,8 @@ const tabs = [
   { key: 'permission', label: '权限管理', icon: '🔐' },
   // { key: 'deepseek', label: 'DeepSeek AI', icon: '🤖' },
   { key: 'deepseek', label: '内嵌百度', icon: '🔍' },
+  { key: 'hello', label: '传参内嵌', icon: '📌', htmlFile: 'hello.html' },
+  // { key: 'aichat', label: 'AI角色对话', icon: '🤖' },
 ];
 
 const Welcome = () => {
@@ -95,6 +99,9 @@ const Welcome = () => {
       // case 'permissions': return <DbPermissions />;
       case 'permission': return <PermissionManager />;
       case 'deepseek': return <DeepSeekChat />;
+      case 'hello': return <PureHtmlPage htmlFile="hello.html" />;
+      // renderContent switch 添加
+      // case 'aichat': return <AIChat />;
       default: return <Report />;
     }
   };

@@ -7,6 +7,6 @@ server/node_modules/
 server/generate-backend.js
 
 generate-project.js
-
-
+server/aichat-init-backend.js
+server/*.ps1
 other.md
